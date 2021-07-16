@@ -3,7 +3,7 @@ import { MicrosoftAppCredentials } from "botframework-connector";
 import { Request } from 'restify';
 import { serviceUrl } from '../teamsBot';
 import axios from "axios";
-import { MeetingDetailsResponse } from "../types/MeetingDetailsResponse";
+import { MeetingDetailsResponse } from "../types/meetingDetailsResponse";
 
 export class MeetingBreakController {
     async getMeetingDetails(req: Request): Promise<MeetingDetailsResponse>
