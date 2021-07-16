@@ -1,6 +1,6 @@
-import { Conversation } from "./Conversation";
-import { Details } from "./Details";
-import { Organizer } from "./Organizer";
+import { Conversation } from "./conversation";
+import { Details } from "./details";
+import { Organizer } from "./organizer";
 
 export interface MeetingDetailsResponse {
     details:      Details;
