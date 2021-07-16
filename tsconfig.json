@@ -3,10 +3,10 @@
     "declaration": true,
     "target": "es2016",
     "module": "commonjs",
-    "outDir": "./lib",
-    "rootDir": "./",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "sourceMap": true,
     "incremental": true,
-    "tsBuildInfoFile": "./lib/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   }
 }

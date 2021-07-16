@@ -1,9 +1,4 @@
-// Import required packages
-import * as path from "path";
 import * as restify from "restify";
-
-// Import required bot services.
-// See https://aka.ms/bot-services to learn more about the different parts of a bot.
 import {
   BotFrameworkAdapter,
   ConversationState,
@@ -12,9 +7,13 @@ import {
   TurnContext,
 } from "botbuilder";
 
-// This bot's main dialog.
+import { config } from 'dotenv'
 import { TeamsBot } from "./teamsBot";
-import { MainDialog } from "./dialogs/mainDialog";
+import { MeetingBreakController } from "./controllers/meetingBreakController";
+const path = require('path');
+const bodyParser = require('body-parser');
+const ENV_FILE = path.join(__dirname, '.env')
+config({ path: ENV_FILE })
 
 // Create adapter.
 // See https://aka.ms/about-bot-adapter to learn more about adapters.
@@ -59,13 +58,15 @@ const dedupMemory = new MemoryStorage();
 const conversationState = new ConversationState(memoryStorage);
 const userState = new UserState(memoryStorage);
 
-// Create the main dialog.
-const dialog = new MainDialog(dedupMemory);
 // Create the bot that will handle incoming messages.
-const bot = new TeamsBot(conversationState, userState, dialog);
+const bot = new TeamsBot(conversationState, userState);
 
 // Create HTTP server.
-const server = restify.createServer();
+const server = restify.createServer({
+  handleUncaughtExceptions: true
+});
+server.use(bodyParser.json())
+server.use(bodyParser.urlencoded({ extended: true }))
 server.listen(process.env.port || process.env.PORT || 3978, () => {
   console.log(`\nBot Started, ${server.name} listening to ${server.url}`);
 });
@@ -76,17 +77,8 @@ server.post("/api/messages", async (req, res) => {
     .processActivity(req, res, async (context) => {
       await bot.run(context);
     })
-    .catch((err) => {
-      // Error message including "412" means it is waiting for user's consent, which is a normal process of SSO, sholdn't throw this error.
-      if (!err.message.includes("412")) {
-        throw err;
-      }
-    });
 });
 
-server.get(
-  "/auth-*.html",
-  restify.plugins.serveStatic({
-    directory: path.join(__dirname, "public"),
-  })
-);
+const meetingBreakController = new MeetingBreakController()
+
+server.post("/api/sendMeetingDetails", meetingBreakController.getMeetingDetails)

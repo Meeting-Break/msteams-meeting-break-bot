@@ -1,4 +1,10 @@
-node_modules
-/.fx/*.env
-/.fx/*.userdata
+# dependencies
+node_modules/
+
+# misc
+.env
+.deployment
 .DS_Store
+
+# build
+dist/
