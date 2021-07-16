@@ -10,6 +10,7 @@ import {
 import { config } from 'dotenv'
 import { TeamsBot } from "./teamsBot";
 import { MeetingBreakController } from "./controllers/meetingBreakController";
+import { HealthController } from "./controllers/healthController";
 const path = require('path');
 const bodyParser = require('body-parser');
 const ENV_FILE = path.join(__dirname, '.env')
@@ -80,5 +81,7 @@ server.post("/api/messages", async (req, res) => {
 });
 
 const meetingBreakController = new MeetingBreakController()
-
 server.post("/api/sendMeetingDetails", meetingBreakController.getMeetingDetails)
+
+const healthController = new HealthController()
+server.get("/api/health", healthController.getHealth)
