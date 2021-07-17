@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AZURE_WEBAPP_NAME: msteamsmeetingbreakapi
-      AZURE_WEBAPP_PACKAGE_PATH: 'dist' 
+      AZURE_WEBAPP_PACKAGE_PATH: 'dist/app.zip' 
     steps:
       - uses: actions/checkout@v2
         name: "Checkout"
