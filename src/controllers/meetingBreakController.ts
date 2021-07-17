@@ -1,27 +1,37 @@
 
 import { MicrosoftAppCredentials } from "botframework-connector";
-import { Request, Response, Next } from 'restify';
+import { NextFunction, Request, Response } from 'express';
 import { serviceUrl } from '../teamsBot';
 import axios from "axios";
-import { MeetingDetailsResponse } from "../types/meetingDetailsResponse";
-
+import { ParticipantDetailsPayload } from "../types/payloads/participantDetailsResponse";
+import { ParticipantDetailsResponse } from "../types/teams/participantDetailsResponse";
 export class MeetingBreakController {
-    async getMeetingDetails(req: Request, res: Response, next: Next)
+    async getParticipantDetails(req: Request, res: Response, next: NextFunction)
     {
         const credentials = new MicrosoftAppCredentials(
             process.env.BOT_ID,
             process.env.BOT_PASSWORD
         )
-
         const meetingId = req.body?.meetingId;
+        const participantId = req.body?.participantId;
+        const tenantId = req.body?.tenantId;
+
         const token = await credentials.getToken();
-        const getMeetingDetailsRequest = await axios.get(`${serviceUrl}/v1/meetings/${meetingId}`, {
+        const getParticipantDetailsRequest = await axios.get(`${serviceUrl}v1/meetings/${meetingId}/participants/${participantId}?tenantId=${tenantId}`, {
             headers: {
                 'Authorization': "Bearer " + token
             }
         })
-        const response = getMeetingDetailsRequest.data as MeetingDetailsResponse
-        res.send(200, response)
-        return next();
+        const getParticipantDetailsData = getParticipantDetailsRequest.data as ParticipantDetailsResponse
+        const payload: ParticipantDetailsPayload = {
+            user: {
+                name: getParticipantDetailsData.user.name
+            },
+            meeting: {
+                role: getParticipantDetailsData.meeting.role
+            }
+        }
+        res.send(payload)
+        return next()
     }
 }

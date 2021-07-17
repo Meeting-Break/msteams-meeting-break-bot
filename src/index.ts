@@ -1,4 +1,5 @@
-import * as restify from "restify";
+import * as express from "express"
+import * as cors from "cors";
 import {
   BotFrameworkAdapter,
   ConversationState,
@@ -22,7 +23,6 @@ const adapter = new BotFrameworkAdapter({
   appId: process.env.BOT_ID,
   appPassword: process.env.BOT_PASSWORD,
 });
-
 // Catch-all for errors.
 const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
   // This check writes out errors to console log .vs. app insights.
@@ -63,13 +63,19 @@ const userState = new UserState(memoryStorage);
 const bot = new TeamsBot(conversationState, userState);
 
 // Create HTTP server.
-const server = restify.createServer({
-  handleUncaughtExceptions: true
-});
+
+const server = express()
+server.options('*', cors())
+server.use(cors())
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: true }))
+server.use((error, req, res, next) => {
+  res.json({
+    message: error.message
+  });
+});
 server.listen(process.env.port || process.env.PORT || 3978, () => {
-  console.log(`\nBot Started, ${server.name} listening to ${server.url}`);
+  console.log(`\nBot Started`);
 });
 
 // Listen for incoming requests.
@@ -81,7 +87,7 @@ server.post("/api/messages", async (req, res) => {
 });
 
 const meetingBreakController = new MeetingBreakController()
-server.post("/api/sendMeetingDetails", meetingBreakController.getMeetingDetails)
+server.post("/api/sendParticipantDetails", meetingBreakController.getParticipantDetails)
 
 const healthController = new HealthController()
 server.get("/api/health", healthController.getHealth)
