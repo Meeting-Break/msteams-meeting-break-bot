@@ -1,14 +1,16 @@
 
 import { MicrosoftAppCredentials } from "botframework-connector";
 import { NextFunction, Request, Response } from 'express';
-import { serviceUrl, conversationId } from '../teamsBot';
 import axios from "axios";
+
+import { serviceUrl, conversationId } from '../teamsBot';
 import { ParticipantDetailsPayload } from "../types/payloads/participantDetailsPayload";
 import { ParticipantDetailsResponse } from "../types/teams/participantDetailsResponse";
 import { SetBreakDetailsInput } from "../types/inputs/setBreakDetailsInput";
 import { GetBreakDetailsPayload } from "../types/payloads/getBreakDetailsPayload";
 import createContainerClient from "../factories/blobStorageFactory";
 import { streamToString } from "../utilities/parsingUtils";
+import breakJobManager = require("../managers/breakJobManager");
 
 export class MeetingBreakController {
     async getParticipantDetails(req: Request, res: Response, next: NextFunction)
@@ -42,9 +44,23 @@ export class MeetingBreakController {
 
     async setBreakDetails(req: Request, res: Response, next: NextFunction) {
         const breakDetails = req.body as SetBreakDetailsInput
+        if (breakDetails.cancelled) {
+            breakJobManager.default.stop(breakDetails.meeting.id.value)
+        }
         const breakDetailsJson = JSON.stringify(breakDetails)
-        const blockBlobContainer = createContainerClient().getBlockBlobClient(`${breakDetails.meeting.id.value}.json`)
+        const containerClient = createContainerClient()
+        const blockBlobContainer = containerClient.getBlockBlobClient(`${breakDetails.meeting.id.value}.json`)
+        const isNewBreak = (start: Date, duration: { minutes: number, seconds: number }) => {
+            const totalSeconds = (duration.minutes * 60) + duration.seconds
+            const currentTime = new Date()
+            return ((start.getTime() / 1000) + totalSeconds) > (currentTime.getTime() / 1000)
+        }
+
+        if (!breakDetails.cancelled && (!(await blockBlobContainer.exists()) || isNewBreak(new Date(breakDetails.start), breakDetails.duration))) {
+            breakJobManager.default.start(breakDetails)
+        }
         await blockBlobContainer.upload(breakDetailsJson, breakDetailsJson.length)
+        
         res.sendStatus(200)
         return next()
     }
@@ -61,27 +77,5 @@ export class MeetingBreakController {
         }
 
         return next();
-    }
-
-    async sendEndOfBreakNotification(req: Request, res: Response, next: NextFunction) {
-        const credentials = new MicrosoftAppCredentials(
-            process.env.BOT_ID,
-            process.env.BOT_PASSWORD
-        )
-
-        const token = await credentials.getToken();
-        const sendNotificationSignalRequest = await axios.post(`${serviceUrl}v3/conversations/${conversationId}/activities`, 
-        {
-            "type": "message",
-            "text": "The meeting break has ended.",
-            "summary": "Return to the meeting."
-        }, 
-        {
-            headers: {
-                'Authorization': "Bearer " + token
-            }
-        })
-        res.sendStatus(sendNotificationSignalRequest.status)
-        return next()
     }
 }

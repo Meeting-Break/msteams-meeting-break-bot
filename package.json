@@ -2,7 +2,7 @@
   "name": "meetingbreakbot",
   "version": "1.0.0",
   "description": "Bot for Meeting Break",
-  "author": "Microsoft",
+  "author": "Nybble Apps LLC",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc --build",
