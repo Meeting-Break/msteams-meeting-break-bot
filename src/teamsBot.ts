@@ -5,6 +5,7 @@ import {
 } from "botbuilder";
 
 export let serviceUrl: string;
+export let conversationId: string;
 
 export class TeamsBot extends TeamsActivityHandler {
   conversationState: BotState;
@@ -20,18 +21,12 @@ export class TeamsBot extends TeamsActivityHandler {
     }
     this.conversationState = conversationState;
     this.userState = userState;
-    
-    this.onMessage(async (context, next) => {
-      console.log("Running dialog with Message Activity.");
-      console.log(context.activity.serviceUrl);
-      // By calling next() you ensure that the next BotHandler is run.
-      await next();
-    });
 
     this.onConversationUpdate(async (context, next) => {
-      console.log("hello from onConversationUpdate")
       serviceUrl = context.activity.serviceUrl;
-      console.log(serviceUrl)
+      conversationId = context.activity.conversation.id;
+      console.log(`serviceUrl=${serviceUrl}`)
+      console.log(`conversationId=${conversationId}`)
     })
   }
 

@@ -87,7 +87,9 @@ server.post("/api/messages", async (req, res) => {
 });
 
 const meetingBreakController = new MeetingBreakController()
+server.post("/api/setBreakDetails", meetingBreakController.setBreakDetails)
 server.post("/api/sendParticipantDetails", meetingBreakController.getParticipantDetails)
+server.get("/api/getBreakDetails", meetingBreakController.getBreakDetails)
 
 const healthController = new HealthController()
 server.get("/api/health", healthController.getHealth)
