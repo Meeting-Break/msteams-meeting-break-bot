@@ -22,7 +22,7 @@ jobs:
       - run: npm run build
         name: "Build"
       
-      - run: zip -9 -r app.zip .
+      - run: pushd build/; zip -9 -r ../app.zip *; popd; zip -ur app.zip package.json package-lock.json
         name: "Compress" 
 
       - name: "Upload app artifact"
