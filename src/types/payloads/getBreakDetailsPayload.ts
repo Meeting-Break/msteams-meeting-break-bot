@@ -14,4 +14,8 @@ export interface GetBreakDetailsPayload {
         seconds: number;
     };
     cancelled: boolean;
+    createdBy: {
+        name: string;
+        role: string;
+    };
 }

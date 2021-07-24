@@ -14,4 +14,8 @@ export interface SetBreakDetailsInput {
         seconds: number;
     };
     cancelled: boolean;
+    createdBy: {
+        name: string;
+        role: string;
+    };
 }
