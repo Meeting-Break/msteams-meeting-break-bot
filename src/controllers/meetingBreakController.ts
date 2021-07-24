@@ -3,7 +3,7 @@ import { MicrosoftAppCredentials } from "botframework-connector";
 import { NextFunction, Request, Response } from 'express';
 import axios from "axios";
 
-import { serviceUrl, conversationId } from '../teamsBot';
+import { serviceUrl } from '../teamsBot';
 import { ParticipantDetailsPayload } from "../types/payloads/participantDetailsPayload";
 import { ParticipantDetailsResponse } from "../types/teams/participantDetailsResponse";
 import { SetBreakDetailsInput } from "../types/inputs/setBreakDetailsInput";
@@ -11,6 +11,7 @@ import { GetBreakDetailsPayload } from "../types/payloads/getBreakDetailsPayload
 import createContainerClient from "../factories/blobStorageFactory";
 import { streamToString } from "../utilities/parsingUtils";
 import breakJobManager = require("../managers/breakJobManager");
+import cacheService = require("../services/cacheService");
 
 export class MeetingBreakController {
     async getParticipantDetails(req: Request, res: Response, next: NextFunction)
@@ -41,6 +42,7 @@ export class MeetingBreakController {
             }
             res.send(payload)
         } catch (e) {
+            console.error(e)
             res.sendStatus(500)
         }
         
@@ -66,9 +68,10 @@ export class MeetingBreakController {
                 breakJobManager.default.start(breakDetails)
             }
             await blockBlobContainer.upload(breakDetailsJson, breakDetailsJson.length)
-            
+            cacheService.default.put(breakDetails.meeting.id.value, breakDetails, (breakDetails.duration.minutes * 60) + breakDetails.duration.seconds)
             res.sendStatus(200)
         } catch (e) {
+            console.error(e)
             res.sendStatus(500);
         }
 
@@ -77,12 +80,19 @@ export class MeetingBreakController {
 
     async getBreakDetails(req: Request, res: Response, next: NextFunction) {
         try {
-            const meetingId = req.query.meetingId;
+            const meetingId = req.query.meetingId as string;
+            const cachedBreakDetails = cacheService.default.get(meetingId) as GetBreakDetailsPayload
+            if (cachedBreakDetails) {
+                res.send(cachedBreakDetails)
+                return next()
+            }
+
             const blobContainer = createContainerClient().getBlockBlobClient(`${meetingId}.json`)
             const data = (await streamToString((await blobContainer.download()).readableStreamBody))
             const breakDetails = JSON.parse(data) as GetBreakDetailsPayload
             res.send(breakDetails)
         } catch(e) {
+            console.error(e)
             res.send(undefined)
         }
 
