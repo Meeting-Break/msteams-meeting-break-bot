@@ -15,53 +15,63 @@ import breakJobManager = require("../managers/breakJobManager");
 export class MeetingBreakController {
     async getParticipantDetails(req: Request, res: Response, next: NextFunction)
     {
-        const credentials = new MicrosoftAppCredentials(
-            process.env.BOT_ID,
-            process.env.BOT_PASSWORD
-        )
-        const meetingId = req.body?.meetingId;
-        const participantId = req.body?.participantId;
-        const tenantId = req.body?.tenantId;
+        try {
+            const credentials = new MicrosoftAppCredentials(
+                process.env.BOT_ID,
+                process.env.BOT_PASSWORD
+            )
+            const meetingId = req.body?.meetingId;
+            const participantId = req.body?.participantId;
+            const tenantId = req.body?.tenantId;
 
-        const token = await credentials.getToken();
-        const getParticipantDetailsRequest = await axios.get(`${serviceUrl}v1/meetings/${meetingId}/participants/${participantId}?tenantId=${tenantId}`, {
-            headers: {
-                'Authorization': "Bearer " + token
+            const token = await credentials.getToken();
+            const getParticipantDetailsRequest = await axios.get(`${serviceUrl}v1/meetings/${meetingId}/participants/${participantId}?tenantId=${tenantId}`, {
+                headers: {
+                    'Authorization': "Bearer " + token
+                }
+            })
+            const getParticipantDetailsData = getParticipantDetailsRequest.data as ParticipantDetailsResponse
+            const payload: ParticipantDetailsPayload = {
+                user: {
+                    name: getParticipantDetailsData.user.name
+                },
+                meeting: {
+                    role: getParticipantDetailsData.meeting.role
+                }
             }
-        })
-        const getParticipantDetailsData = getParticipantDetailsRequest.data as ParticipantDetailsResponse
-        const payload: ParticipantDetailsPayload = {
-            user: {
-                name: getParticipantDetailsData.user.name
-            },
-            meeting: {
-                role: getParticipantDetailsData.meeting.role
-            }
+            res.send(payload)
+        } catch (e) {
+            res.sendStatus(500)
         }
-        res.send(payload)
+        
         return next()
     }
 
     async setBreakDetails(req: Request, res: Response, next: NextFunction) {
-        const breakDetails = req.body as SetBreakDetailsInput
-        if (breakDetails.cancelled) {
-            breakJobManager.default.stop(breakDetails.meeting.id.value)
-        }
-        const breakDetailsJson = JSON.stringify(breakDetails)
-        const containerClient = createContainerClient()
-        const blockBlobContainer = containerClient.getBlockBlobClient(`${breakDetails.meeting.id.value}.json`)
-        const isNewBreak = (start: Date, duration: { minutes: number, seconds: number }) => {
-            const totalSeconds = (duration.minutes * 60) + duration.seconds
-            const currentTime = new Date()
-            return ((start.getTime() / 1000) + totalSeconds) > (currentTime.getTime() / 1000)
+        try {
+            const breakDetails = req.body as SetBreakDetailsInput
+            if (breakDetails.cancelled) {
+                breakJobManager.default.stop(breakDetails.meeting.id.value)
+            }
+            const breakDetailsJson = JSON.stringify(breakDetails)
+            const containerClient = createContainerClient()
+            const blockBlobContainer = containerClient.getBlockBlobClient(`${breakDetails.meeting.id.value}.json`)
+            const isNewBreak = (start: Date, duration: { minutes: number, seconds: number }) => {
+                const totalSeconds = (duration.minutes * 60) + duration.seconds
+                const currentTime = new Date()
+                return ((start.getTime() / 1000) + totalSeconds) > (currentTime.getTime() / 1000)
+            }
+
+            if (!breakDetails.cancelled && (!(await blockBlobContainer.exists()) || isNewBreak(new Date(breakDetails.start), breakDetails.duration))) {
+                breakJobManager.default.start(breakDetails)
+            }
+            await blockBlobContainer.upload(breakDetailsJson, breakDetailsJson.length)
+            
+            res.sendStatus(200)
+        } catch (e) {
+            res.sendStatus(500);
         }
 
-        if (!breakDetails.cancelled && (!(await blockBlobContainer.exists()) || isNewBreak(new Date(breakDetails.start), breakDetails.duration))) {
-            breakJobManager.default.start(breakDetails)
-        }
-        await blockBlobContainer.upload(breakDetailsJson, breakDetailsJson.length)
-        
-        res.sendStatus(200)
         return next()
     }
 
