@@ -18,6 +18,11 @@ const bodyParser = require('body-parser');
 const ENV_FILE = path.join(__dirname, '.env')
 config({ path: ENV_FILE })
 
+if (process.env.NODE_ENV === 'production') {
+  let appInsights = require('applicationinsights');
+  appInsights.setup().start()
+}
+
 // Create adapter.
 // See https://aka.ms/about-bot-adapter to learn more about adapters.
 const adapter = new BotFrameworkAdapter({
