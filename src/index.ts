@@ -74,8 +74,8 @@ const server = express()
 server.options('*', cors())
 server.use(compression())
 server.use(cors())
-server.use(bodyParser.json())
-server.use(bodyParser.urlencoded({ extended: true }))
+server.use(bodyParser.json({ limit: '1mb' }))
+server.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
 server.use((error, req, res, next) => {
   res.json({
     message: error.message
