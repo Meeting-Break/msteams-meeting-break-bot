@@ -12,6 +12,7 @@ import { config } from 'dotenv'
 import { TeamsBot } from "./teamsBot";
 import { MeetingBreakController } from "./controllers/meetingBreakController";
 import { HealthController } from "./controllers/healthController";
+const compression = require('compression')
 const path = require('path');
 const bodyParser = require('body-parser');
 const ENV_FILE = path.join(__dirname, '.env')
@@ -66,6 +67,7 @@ const bot = new TeamsBot(conversationState, userState);
 
 const server = express()
 server.options('*', cors())
+server.use(compression())
 server.use(cors())
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: true }))

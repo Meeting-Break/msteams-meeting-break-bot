@@ -23,6 +23,7 @@
     "botbuilder": "^4.12.0",
     "botbuilder-core": "^4.12.0",
     "botframework-connector": "^4.14.0",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
