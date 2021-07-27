@@ -18,8 +18,6 @@ const bodyParser = require('body-parser');
 const ENV_FILE = path.join(__dirname, '.env')
 config({ path: ENV_FILE })
 
-console.log(`NODE_ENV=${process.env.NODE_ENV}`)
-console.log(`BOT_ID=${process.env.BOT_ID}`)
 if (process.env.NODE_ENV === 'production') {
   let appInsights = require('applicationinsights');
   appInsights.setup().start()
