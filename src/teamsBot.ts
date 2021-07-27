@@ -3,9 +3,9 @@ import {
   BotState,
   TurnContext,
 } from "botbuilder";
+import * as cacheService from './services/cacheService';
 
 export let serviceUrl: string;
-export let conversationId: string;
 
 export class TeamsBot extends TeamsActivityHandler {
   conversationState: BotState;
@@ -24,9 +24,15 @@ export class TeamsBot extends TeamsActivityHandler {
 
     this.onConversationUpdate(async (context, next) => {
       serviceUrl = context.activity.serviceUrl;
-      conversationId = context.activity.conversation.id;
-      console.log(`serviceUrl=${serviceUrl}`)
-      console.log(`conversationId=${conversationId}`)
+      const conversationId = context.activity.conversation.id;
+      const meetingId = context.activity.channelData.meeting.id;
+      let conversationIds = cacheService.default.get('conversationIds') as { [meetingId: string]: string}
+      if (!conversationIds) {
+        conversationIds = { }
+      }
+
+      conversationIds[meetingId] = conversationId
+      cacheService.default.put('conversationIds', conversationIds)
     })
   }
 

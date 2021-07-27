@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc --build",
     "start": "npm run build && node ./dist/index.js",
+    "start:ngrok": "ngrok http --region=eu -subdomain=msteams-meeting-break-bot 3978",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "nodemon --watch ./src -e ts --exec \"npm run start\""
   },

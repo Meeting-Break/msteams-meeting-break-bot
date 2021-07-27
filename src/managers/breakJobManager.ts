@@ -1,7 +1,8 @@
 
 import axios from "axios";
 import { MicrosoftAppCredentials } from "botframework-connector";
-import { conversationId, serviceUrl } from "../teamsBot";
+import cacheService from "../services/cacheService";
+import { serviceUrl } from "../teamsBot";
 import { SetBreakDetailsInput } from "../types/inputs/setBreakDetailsInput"
 
 class BreakJobManager {
@@ -17,7 +18,14 @@ class BreakJobManager {
         const timer = setInterval(async () => {
             this.timers[meetingId].remainingDuration -= 1
             if (this.timers[meetingId].remainingDuration === 0) {
-                await this.sendEndOfBreakNotification()
+                const conversationIds = cacheService.get('conversationIds') as { [meetingId: string]: string }
+                if (!(meetingId in conversationIds)) {
+                    console.error(`meetingId ${meetingId} does not have a conversationId.`)
+                    return;
+                }
+
+                const conversationId = conversationIds[meetingId]
+                await this.sendEndOfBreakNotification(conversationId)
                 this.stop(meetingId)
             }
         }, 1000)
@@ -31,7 +39,7 @@ class BreakJobManager {
         }
     }
 
-    private async sendEndOfBreakNotification() {
+    private async sendEndOfBreakNotification(conversationId: string) {
         const credentials = new MicrosoftAppCredentials(
             process.env.BOT_ID,
             process.env.BOT_PASSWORD
