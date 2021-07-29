@@ -71,24 +71,24 @@ const bot = new TeamsBot(conversationState, userState);
 
 // Create HTTP server.
 
-const server = express()
-server.options('*', cors())
-server.use(compression())
-server.use(helmet())
-server.use(cors())
-server.use(bodyParser.json({ limit: '1mb' }))
-server.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
-server.use((error, req, res, next) => {
+const app = express()
+app.options('*', cors())
+app.use(compression())
+app.use(helmet())
+app.use(cors())
+app.use(bodyParser.json({ limit: '1mb' }))
+app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
+app.use((error, req, res, next) => {
   res.json({
     message: error.message
   });
 });
-server.listen(process.env.port || process.env.PORT || 3978, () => {
+const server = app.listen(process.env.port || process.env.PORT || 3978, () => {
   console.log(`\nBot Started`);
 });
 
 // Listen for incoming requests.
-server.post("/api/messages", async (req, res) => {
+app.post("/api/messages", async (req, res) => {
   await adapter
     .processActivity(req, res, async (context) => {
       await bot.run(context);
@@ -96,9 +96,16 @@ server.post("/api/messages", async (req, res) => {
 });
 
 const meetingBreakController = new MeetingBreakController()
-server.post("/api/setBreakDetails", meetingBreakController.setBreakDetails)
-server.post("/api/sendParticipantDetails", meetingBreakController.getParticipantDetails)
-server.get("/api/getBreakDetails", meetingBreakController.getBreakDetails)
+app.post("/api/setBreakDetails", meetingBreakController.setBreakDetails)
+app.post("/api/sendParticipantDetails", meetingBreakController.getParticipantDetails)
+app.get("/api/getBreakDetails", meetingBreakController.getBreakDetails)
 
 const healthController = new HealthController()
-server.get("/api/health", healthController.getHealth)
+app.get("/api/health", healthController.getHealth)
+
+process.on('SIGTERM', () => {
+  console.debug('SIGTERM signal received: closing HTTP server')
+  server.close(() => {
+    console.log('HTTP server closed')
+  })
+})
