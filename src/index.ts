@@ -1,5 +1,6 @@
 import * as express from "express"
 import * as cors from "cors";
+import * as helmet from  "helmet";
 import {
   BotFrameworkAdapter,
   ConversationState,
@@ -73,6 +74,7 @@ const bot = new TeamsBot(conversationState, userState);
 const server = express()
 server.options('*', cors())
 server.use(compression())
+server.use(helmet())
 server.use(cors())
 server.use(bodyParser.json({ limit: '1mb' }))
 server.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
