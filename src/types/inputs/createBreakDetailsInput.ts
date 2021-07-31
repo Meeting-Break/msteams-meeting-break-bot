@@ -1,4 +1,4 @@
-export interface SetBreakDetailsInput {
+export interface CreateBreakDetailsInput {
     meeting: {
         id: {
             value: string

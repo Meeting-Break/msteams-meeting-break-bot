@@ -3,15 +3,16 @@ import {
   BotState,
   TurnContext,
 } from "botbuilder";
-import * as cacheService from './services/cacheService';
+import { inject } from "inversify";
+import { container } from "./inversify.config";
+import CacheService from './services/cacheService';
 
 export let serviceUrl: string;
 
 export class TeamsBot extends TeamsActivityHandler {
-  conversationState: BotState;
-  userState: BotState;
-  
-  constructor(conversationState: BotState, userState: BotState) {
+  constructor(
+              private conversationState: BotState, 
+              private userState: BotState) {
     super();
     if (!conversationState) {
       throw new Error("[TeamsBot]: Missing parameter. conversationState is required");
@@ -19,20 +20,18 @@ export class TeamsBot extends TeamsActivityHandler {
     if (!userState) {
       throw new Error("[TeamsBot]: Missing parameter. userState is required");
     }
-    this.conversationState = conversationState;
-    this.userState = userState;
 
     this.onConversationUpdate(async (context, next) => {
       serviceUrl = context.activity.serviceUrl;
       const conversationId = context.activity.conversation.id;
       const meetingId = context.activity.channelData.meeting.id;
-      let conversationIds = cacheService.default.get('conversationIds') as { [meetingId: string]: string}
-      if (!conversationIds) {
-        conversationIds = { }
-      }
+      // let conversationIds = this.cacheService.get('conversationIds') as { [meetingId: string]: string}
+      // if (!conversationIds) {
+      //   conversationIds = { }
+      // }
 
-      conversationIds[meetingId] = conversationId
-      cacheService.default.put('conversationIds', conversationIds)
+      // conversationIds[meetingId] = conversationId
+      // this.cacheService.put('conversationIds', conversationIds)
     })
   }
 

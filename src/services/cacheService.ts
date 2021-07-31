@@ -1,6 +1,8 @@
+import { injectable } from 'inversify'
 import { get, put, del, clear } from 'memory-cache'
 
-class CacheService {
+@injectable()
+export default class CacheService {
     put(key: string, value: any, time?: number) {
         console.debug(`Adding ${key} to cache.`)
         put(key, value, time)
@@ -21,5 +23,3 @@ class CacheService {
         clear()
     }
 }
-
-export default new CacheService()

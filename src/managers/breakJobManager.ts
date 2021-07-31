@@ -1,14 +1,18 @@
 
 import axios from "axios";
 import { MicrosoftAppCredentials } from "botframework-connector";
-import cacheService from "../services/cacheService";
+import { inject, injectable } from "inversify";
+import CacheService from "../services/cacheService";
 import { serviceUrl } from "../teamsBot";
-import { SetBreakDetailsInput } from "../types/inputs/setBreakDetailsInput"
+import { CreateBreakDetailsInput } from "../types/inputs/createBreakDetailsInput"
 
-class BreakJobManager {
+@injectable()
+export default class BreakJobManager {
     private timers: { [meetingId: string] : { remainingDuration: number, timer: NodeJS.Timer; } } = {}
+
+    constructor( @inject("CacheService") private cacheService: CacheService ) { }
     
-    start(breakDetails: SetBreakDetailsInput) {
+    start(breakDetails: CreateBreakDetailsInput) {
         const meetingId = breakDetails.meeting.id.value;
         this.timers[meetingId] = {
             remainingDuration: (breakDetails.duration.minutes * 60) + breakDetails.duration.seconds,
@@ -18,7 +22,7 @@ class BreakJobManager {
         const timer = setInterval(async () => {
             this.timers[meetingId].remainingDuration -= 1
             if (this.timers[meetingId].remainingDuration === 0) {
-                const conversationIds = cacheService.get('conversationIds') as { [meetingId: string]: string }
+                const conversationIds = this.cacheService.get('conversationIds') as { [meetingId: string]: string }
                 if (!(meetingId in conversationIds)) {
                     console.error(`meetingId ${meetingId} does not have a conversationId.`)
                     return;
@@ -62,5 +66,3 @@ class BreakJobManager {
         })
     }
 }
-
-export default new BreakJobManager()

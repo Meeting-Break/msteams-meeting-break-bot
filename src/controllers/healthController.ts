@@ -4,7 +4,9 @@ import { interfaces, controller, httpGet, request, response, next } from "invers
 @controller("/health")
 export class HealthController implements interfaces.Controller {
     @httpGet("/")
-    async getHealth(@request() _req: Request, @response() res: Response, @next() next: NextFunction) {
+    async getHealth(@request() _req: Request, 
+                    @response() res: Response, 
+                    @next() next: NextFunction) {
         res.sendStatus(200)
         return next();
     }
