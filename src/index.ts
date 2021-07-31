@@ -1,4 +1,3 @@
-import * as express from "express"
 import * as cors from "cors";
 import * as helmet from  "helmet";
 import {
@@ -8,11 +7,13 @@ import {
   UserState,
   TurnContext,
 } from "botbuilder";
-
+import { Container } from 'inversify';
+import "reflect-metadata"
+import { InversifyExpressServer } from 'inversify-express-utils';
 import { config } from 'dotenv'
 import { TeamsBot } from "./teamsBot";
 import { MeetingBreakController } from "./controllers/meetingBreakController";
-import { HealthController } from "./controllers/healthController";
+import "./controllers/healthController";
 const compression = require('compression')
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -58,10 +59,6 @@ adapter.onTurnError = onTurnErrorHandler;
 // A bot requires a state storage system to persist the dialog and user state between messages.
 const memoryStorage = new MemoryStorage();
 
-// For a distributed bot in production,
-// this requires a distributed storage to ensure only one token exchange is processed.
-const dedupMemory = new MemoryStorage();
-
 // Create conversation and user state with in-memory storage provider.
 const conversationState = new ConversationState(memoryStorage);
 const userState = new UserState(memoryStorage);
@@ -70,19 +67,24 @@ const userState = new UserState(memoryStorage);
 const bot = new TeamsBot(conversationState, userState);
 
 // Create HTTP server.
+let container = new Container()
 
-const app = express()
-app.options('*', cors())
-app.use(compression())
-app.use(helmet())
-app.use(cors())
-app.use(bodyParser.json({ limit: '1mb' }))
-app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
-app.use((error, req, res, next) => {
-  res.json({
-    message: error.message
+let inversifyServer = new InversifyExpressServer(container, null, { rootPath: "/api" })
+inversifyServer.setConfig((app) => {
+  app.options('*', cors())
+  app.use(compression())
+  app.use(helmet())
+  app.use(cors())
+  app.use(bodyParser.json({ limit: '1mb' }))
+  app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
+  app.use((error, req, res, next) => {
+    res.json({
+      message: error.message
+    });
   });
-});
+})
+
+const app = inversifyServer.build()
 const server = app.listen(process.env.port || process.env.PORT || 3978, () => {
   console.log(`\nBot Started`);
 });
@@ -99,9 +101,6 @@ const meetingBreakController = new MeetingBreakController()
 app.post("/api/setBreakDetails", meetingBreakController.setBreakDetails)
 app.post("/api/sendParticipantDetails", meetingBreakController.getParticipantDetails)
 app.get("/api/getBreakDetails", meetingBreakController.getBreakDetails)
-
-const healthController = new HealthController()
-app.get("/api/health", healthController.getHealth)
 
 process.on('SIGTERM', () => {
   console.debug('SIGTERM signal received: closing HTTP server')
