@@ -1,5 +1,3 @@
-import * as cors from "cors";
-import * as helmet from  "helmet";
 import {
   BotFrameworkAdapter,
   ConversationState,
@@ -8,15 +6,11 @@ import {
   TurnContext,
 } from "botbuilder";
 import "reflect-metadata"
-import { InversifyExpressServer } from 'inversify-express-utils';
 import { config } from 'dotenv'
 import { TeamsBot } from "./teamsBot";
-import { container } from "./inversify.config";
-import CacheService from "./services/cacheService";
+import { app } from "./app";
 
-const compression = require('compression')
 const path = require('path');
-const bodyParser = require('body-parser');
 const ENV_FILE = path.join(__dirname, '.env')
 config({ path: ENV_FILE })
 
@@ -54,22 +48,7 @@ const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
 // Set the onTurnError for the singleton BotFrameworkAdapter.
 adapter.onTurnError = onTurnErrorHandler;
 // Create HTTP server.
-let inversifyServer = new InversifyExpressServer(container, null, { rootPath: "/api" })
-inversifyServer.setConfig((app) => {
-  app.options('*', cors())
-  app.use(compression())
-  app.use(helmet())
-  app.use(cors())
-  app.use(bodyParser.json({ limit: '1mb' }))
-  app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }))
-  app.use((error, req, res, next) => {
-    res.json({
-      message: error.message
-    });
-  });
-})
 
-const app = inversifyServer.build()
 const server = app.listen(process.env.port || process.env.PORT || 3978, () => {
   console.log(`\nBot Started`);
 });
