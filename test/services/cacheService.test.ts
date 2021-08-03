@@ -1,6 +1,4 @@
-import request from 'supertest';
 import "reflect-metadata";
-import { app } from '../../src/app';
 import CacheService from '../../src/services/cacheService';
 
 describe('cacheService', () => {
