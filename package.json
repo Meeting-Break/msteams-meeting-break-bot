@@ -10,7 +10,8 @@
     "start:ngrok": "ngrok http --region=eu -subdomain=msteams-meeting-break-bot 3978",
     "test": "jest",
     "watch": "nodemon --watch ./src -e ts --exec \"npm run start\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "format-check": "prettier --check ."
   },
   "repository": {
     "type": "git",
