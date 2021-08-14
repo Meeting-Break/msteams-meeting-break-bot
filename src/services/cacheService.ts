@@ -1,25 +1,25 @@
-import { injectable } from 'inversify'
-import { get, put, del, clear } from 'memory-cache'
+import { injectable } from "inversify";
+import { get, put, del, clear } from "memory-cache";
 
 @injectable()
 export default class CacheService {
-    put(key: string, value: any, time?: number) {
-        console.debug(`Adding ${key} to cache.`)
-        put(key, value, time)
-    }
+  put(key: string, value: any, time?: number) {
+    console.debug(`Adding ${key} to cache.`);
+    put(key, value, time);
+  }
 
-    get(key: string) {
-        console.debug(`Retrieving ${key} from cache.`)
-        return get(key)
-    }
+  get(key: string) {
+    console.debug(`Retrieving ${key} from cache.`);
+    return get(key);
+  }
 
-    del(key: string) {
-        console.debug(`Removing ${key} from cache.`)
-        del(key)
-    }
+  del(key: string) {
+    console.debug(`Removing ${key} from cache.`);
+    del(key);
+  }
 
-    clear() {
-        console.debug("Clearing the cache.")
-        clear()
-    }
+  clear() {
+    console.debug("Clearing the cache.");
+    clear();
+  }
 }

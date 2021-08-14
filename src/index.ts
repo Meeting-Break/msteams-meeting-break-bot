@@ -5,18 +5,18 @@ import {
   UserState,
   TurnContext,
 } from "botbuilder";
-import "reflect-metadata"
-import { config } from 'dotenv'
+import "reflect-metadata";
+import { config } from "dotenv";
 import { TeamsBot } from "./teamsBot";
 import { app } from "./app";
 
-const path = require('path');
-const ENV_FILE = path.join(__dirname, '.env')
-config({ path: ENV_FILE })
+const path = require("path");
+const ENV_FILE = path.join(__dirname, ".env");
+config({ path: ENV_FILE });
 
-if (process.env.NODE_ENV === 'production') {
-  let appInsights = require('applicationinsights');
-  appInsights.setup().start()
+if (process.env.NODE_ENV === "production") {
+  let appInsights = require("applicationinsights");
+  appInsights.setup().start();
 }
 
 // Create adapter.
@@ -41,8 +41,12 @@ const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
   );
 
   // Send a message to the user
-  await context.sendActivity(`The bot encountered unhandled error:\n ${error.message}`);
-  await context.sendActivity("To continue to run this bot, please fix the bot source code.");
+  await context.sendActivity(
+    `The bot encountered unhandled error:\n ${error.message}`
+  );
+  await context.sendActivity(
+    "To continue to run this bot, please fix the bot source code."
+  );
 };
 
 // Set the onTurnError for the singleton BotFrameworkAdapter.
@@ -67,15 +71,14 @@ const bot = new TeamsBot(conversationState, userState);
 
 // Listen for incoming requests.
 app.post("/api/messages", async (req, res) => {
-  await adapter
-    .processActivity(req, res, async (context) => {
-      await bot.run(context);
-    })
+  await adapter.processActivity(req, res, async (context) => {
+    await bot.run(context);
+  });
 });
 
-process.on('SIGTERM', () => {
-  console.debug('SIGTERM signal received: closing HTTP server')
+process.on("SIGTERM", () => {
+  console.debug("SIGTERM signal received: closing HTTP server");
   server.close(() => {
-    console.log('HTTP server closed')
-  })
-})
+    console.log("HTTP server closed");
+  });
+});

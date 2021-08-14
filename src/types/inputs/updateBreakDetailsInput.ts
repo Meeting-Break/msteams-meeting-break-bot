@@ -1,8 +1,8 @@
 export interface UpdateBreakDetailsInput {
-     meeting: {
-        id: {
-            value: string
-        }
+  meeting: {
+    id: {
+      value: string;
     };
-    cancelled: boolean;
+  };
+  cancelled: boolean;
 }

@@ -20,18 +20,13 @@ export default {
   collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  collectCoverageFrom: [
-    "src/**/*.{ts}"
-  ],
+  collectCoverageFrom: ["src/**/*.{ts}"],
 
   // The directory where Jest should output its coverage files
   coverageDirectory: "test/coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: [
-    "<rootDir>/dist",
-    "<rootDir>/node_modules/"
-  ],
+  coveragePathIgnorePatterns: ["<rootDir>/dist", "<rootDir>/node_modules/"],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
@@ -74,11 +69,7 @@ export default {
   // ],
 
   // An array of file extensions your modules use
-  moduleFileExtensions: [
-    "js",
-    "ts",
-    "json"
-  ],
+  moduleFileExtensions: ["js", "ts", "json"],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   // moduleNameMapper: {},
@@ -93,7 +84,7 @@ export default {
   notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: 'ts-jest',
+  preset: "ts-jest",
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -146,14 +137,10 @@ export default {
   // testLocationInResults: false,
 
   // The glob patterns Jest uses to detect test files
-  testMatch: [
-    "**/test/**/*.test.ts"
-  ],
+  testMatch: ["**/test/**/*.test.ts"],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: [
-    "<rootDir>/node_modules/"
-  ],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
@@ -174,9 +161,7 @@ export default {
   // transform: undefined,
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  transformIgnorePatterns: [
-    "<rootDir>/node_modules/"
-  ],
+  transformIgnorePatterns: ["<rootDir>/node_modules/"],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,
@@ -190,5 +175,5 @@ export default {
   // Whether to use watchman for file crawling
   // watchman: true,
 
-  prettierPath: "prettier"
+  prettierPath: "prettier",
 };

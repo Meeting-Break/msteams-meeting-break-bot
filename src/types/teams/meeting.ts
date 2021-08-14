@@ -1,4 +1,4 @@
 export interface Meeting {
-    role: string;
-    inMeeting: boolean;
+  role: string;
+  inMeeting: boolean;
 }

@@ -12,8 +12,5 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": true
   },
-  "exclude": [
-    "test/**",
-    "jest.config.ts"
-  ]
+  "exclude": ["test/**", "jest.config.ts"]
 }

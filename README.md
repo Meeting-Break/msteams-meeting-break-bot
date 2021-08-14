@@ -3,6 +3,7 @@
 Meeting Break API / Bot is used by the Meeting Break application to handle meeting break functionality. The bot is required to get a context while the meeting is in progress which allows us to make requests to meeting API as documented [here](https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/create-apps-for-teams-meetings?tabs=dotnet).
 
 # Developing
+
 1. `npm install`
 2. `npm watch`
 3. `npm start:ngrok`

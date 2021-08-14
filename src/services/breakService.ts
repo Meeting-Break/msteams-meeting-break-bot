@@ -9,34 +9,48 @@ import CacheService from "./cacheService";
 
 @injectable()
 export default class BreakService {
-    constructor( @inject("CacheService") private cacheService: CacheService, 
-                 @inject("BreakJobManager") private breakJobManager: BreakJobManager ) { }
+  constructor(
+    @inject("CacheService") private cacheService: CacheService,
+    @inject("BreakJobManager") private breakJobManager: BreakJobManager
+  ) {}
 
-    async createBreak(breakDetails: CreateBreakDetailsInput) {
-        const breakDetailsJson = JSON.stringify(breakDetails)
-        const containerClient = createContainerClient()
-        const blockBlobContainer = containerClient.getBlockBlobClient(`${breakDetails.meeting.id.value}.json`)
+  async createBreak(breakDetails: CreateBreakDetailsInput) {
+    const breakDetailsJson = JSON.stringify(breakDetails);
+    const containerClient = createContainerClient();
+    const blockBlobContainer = containerClient.getBlockBlobClient(
+      `${breakDetails.meeting.id.value}.json`
+    );
 
-        this.breakJobManager.start(breakDetails)
-        
-        await blockBlobContainer.upload(breakDetailsJson, breakDetailsJson.length)
-        this.cacheService.put(breakDetails.meeting.id.value, breakDetails, (breakDetails.duration.minutes * 60) + breakDetails.duration.seconds)
+    this.breakJobManager.start(breakDetails);
+
+    await blockBlobContainer.upload(breakDetailsJson, breakDetailsJson.length);
+    this.cacheService.put(
+      breakDetails.meeting.id.value,
+      breakDetails,
+      breakDetails.duration.minutes * 60 + breakDetails.duration.seconds
+    );
+  }
+
+  async updateBreak(breakDetails: UpdateBreakDetailsInput) {}
+
+  async getBreak(meetingId: string): Promise<GetBreakDetailsPayload> {
+    const cachedBreakDetails = this.cacheService.get(
+      meetingId
+    ) as GetBreakDetailsPayload;
+    if (cachedBreakDetails) {
+      return cachedBreakDetails;
     }
-    
-    async updateBreak(breakDetails: UpdateBreakDetailsInput) {
-        
-    }
 
-    async getBreak(meetingId: string): Promise<GetBreakDetailsPayload> {
-        const cachedBreakDetails = this.cacheService.get(meetingId) as GetBreakDetailsPayload
-        if (cachedBreakDetails) {
-            return cachedBreakDetails
-        }
+    const blobContainer = createContainerClient().getBlockBlobClient(
+      `${meetingId}.json`
+    );
+    const data = await streamToString(
+      (
+        await blobContainer.download()
+      ).readableStreamBody
+    );
+    const breakDetails = JSON.parse(data) as GetBreakDetailsPayload;
 
-        const blobContainer = createContainerClient().getBlockBlobClient(`${meetingId}.json`)
-        const data = (await streamToString((await blobContainer.download()).readableStreamBody))
-        const breakDetails = JSON.parse(data) as GetBreakDetailsPayload
-
-        return breakDetails
-    }
+    return breakDetails;
+  }
 }

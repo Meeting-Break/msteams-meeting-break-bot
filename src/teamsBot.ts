@@ -1,21 +1,20 @@
-import {
-  TeamsActivityHandler,
-  BotState,
-  TurnContext,
-} from "botbuilder";
+import { TeamsActivityHandler, BotState, TurnContext } from "botbuilder";
 import { inject } from "inversify";
 import { container } from "./inversify.config";
-import CacheService from './services/cacheService';
+import CacheService from "./services/cacheService";
 
 export let serviceUrl: string;
 
 export class TeamsBot extends TeamsActivityHandler {
   constructor(
-              private conversationState: BotState, 
-              private userState: BotState) {
+    private conversationState: BotState,
+    private userState: BotState
+  ) {
     super();
     if (!conversationState) {
-      throw new Error("[TeamsBot]: Missing parameter. conversationState is required");
+      throw new Error(
+        "[TeamsBot]: Missing parameter. conversationState is required"
+      );
     }
     if (!userState) {
       throw new Error("[TeamsBot]: Missing parameter. userState is required");
@@ -32,7 +31,7 @@ export class TeamsBot extends TeamsActivityHandler {
 
       // conversationIds[meetingId] = conversationId
       // this.cacheService.put('conversationIds', conversationIds)
-    })
+    });
   }
 
   async run(context: TurnContext) {

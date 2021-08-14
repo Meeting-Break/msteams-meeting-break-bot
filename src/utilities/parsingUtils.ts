@@ -1,4 +1,6 @@
-export async function streamToString(readableStream: NodeJS.ReadableStream): Promise<string> {
+export async function streamToString(
+  readableStream: NodeJS.ReadableStream
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks = [];
     readableStream.on("data", (data) => {
